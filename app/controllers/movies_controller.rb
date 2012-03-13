@@ -7,7 +7,13 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    @header_classes = {:title => "", :release_date => ""}
+    if params.has_key?(:order)
+      @header_classes[params[:order].to_sym] = "hilite"
+      @movies = Movie.find(:all, :order => params[:order])
+    else
+      @movies = Movie.all
+    end
   end
 
   def new
