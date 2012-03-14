@@ -7,13 +7,21 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @order = ''
+    @ratings = {}
+    @all_ratings = Movie.all_ratings
     @header_classes = {:title => "", :release_date => ""}
-    if params.has_key?(:order)
-      @header_classes[params[:order].to_sym] = "hilite"
-      @movies = Movie.find(:all, :order => params[:order])
-    else
-      @movies = Movie.all
+
+    if params.has_key?(:ratings)
+      @ratings = params[:ratings]
     end
+
+    if params.has_key?(:order)
+      @order = params[:order]
+      @header_classes[@order.to_sym] = "hilite"
+    end
+
+    @movies = Movie.find(:all, :order => @order, :conditions => ["rating IN (?)", @ratings.keys])
   end
 
   def new
