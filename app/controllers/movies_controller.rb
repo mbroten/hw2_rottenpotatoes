@@ -7,21 +7,29 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @order = ''
-    @ratings = {}
-    @all_ratings = Movie.all_ratings
-    @header_classes = {:title => "", :release_date => ""}
+    @order = session.has_key?(:order) ? session[:order] : ""
+    @ratings = session.has_key?(:ratings) ? session[:ratings] : ""
 
     if params.has_key?(:ratings)
       @ratings = params[:ratings]
+      session[:ratings] = @ratings
     end
 
     if params.has_key?(:order)
       @order = params[:order]
-      @header_classes[@order.to_sym] = "hilite"
+      session[:order] = @order
     end
 
-    @movies = Movie.find(:all, :order => @order, :conditions => ["rating IN (?)", @ratings.keys])
+    if params[:ratings] != @ratings or params[:order] != @order
+      redirect_to movies_path({:order => @order, :ratings => @ratings})
+    end
+
+    @header_classes = {:title => "", :release_date => ""}
+    @header_classes[@order.to_sym] = "hilite"
+    @all_ratings = Movie.all_ratings
+
+    conditions = @ratings == "" ? [] : ["rating IN (?)", @ratings.keys]
+    @movies = Movie.find(:all, :order => @order, :conditions => conditions)
   end
 
   def new
